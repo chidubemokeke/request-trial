@@ -1,73 +1,40 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import {
-  request,
   Burn,
-  OwnershipTransferred,
-  Approval,
   Transfer
 } from "../generated/request/request"
-import { ExampleEntity } from "../generated/schema"
+import { TransferEvent, BurnEvent } from "../generated/schema"
 
-export function handleBurn(event: Burn): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+export function handleTransfer(event: Transfer): void {
+  let transfer = TransferEvent.load(event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (!entity) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
-  }
-
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
-
-  // Entity fields can be set based on event parameters
-  entity._burner = event.params._burner
-  entity._value = event.params._value
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.name(...)
-  // - contract.approve(...)
-  // - contract.totalSupply(...)
-  // - contract.transferFrom(...)
-  // - contract.decimals(...)
-  // - contract.burn(...)
-  // - contract.tokenSaleContract(...)
-  // - contract.decreaseApproval(...)
-  // - contract.earlyInvestorWallet(...)
-  // - contract.balanceOf(...)
-  // - contract.burnFrom(...)
-  // - contract.owner(...)
-  // - contract.symbol(...)
-  // - contract.transfer(...)
-  // - contract.increaseApproval(...)
-  // - contract.allowance(...)
-  // - contract.transferableStartTime(...)
+  if (!transfer) {
+  transfer = new TransferEvent(event.transaction.hash.toHexString()) + "-" + event.logIndex.toString()
 }
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
+transfer.senderAddress = event.params.from
+transfer.receiverAddress = event.params.to
+transfer.value = event.params.value
+transfer.block = event.block.number
+transfer.timestamp = event.block.timestamp
+transfer.transactionId = event.transaction.hash
 
-export function handleApproval(event: Approval): void {}
+transfer.save()
 
-export function handleTransfer(event: Transfer): void {}
+}
+
+export function handleBurn(event: Burn): void {
+  let burn = BurnEvent.load(event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
+
+  if (!burn) {
+  burn = new BurnEvent(event.transaction.hash.toHexString()) + "-" + event.logIndex.toString()
+}
+
+burn.burnerAddress = event.params._burner
+burn.value = event.params._value
+burn.blockNumber = event.block.number
+burn.timestamp = event.block.timestamp
+burn.transactionId = event.transaction.hash
+
+burn.save()
+}

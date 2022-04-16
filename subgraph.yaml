@@ -1,4 +1,4 @@
-specVersion: 0.0.1
+specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
@@ -14,8 +14,6 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Burn
-        - OwnershipTransferred
-        - Approval
         - Transfer
       abis:
         - name: request
@@ -23,10 +21,6 @@ dataSources:
       eventHandlers:
         - event: Burn(indexed address,uint256)
           handler: handleBurn
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
       file: ./src/mapping.ts

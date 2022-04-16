@@ -1,6 +1,17 @@
-type ExampleEntity @entity {
+type TransferEvent @entity {
   id: ID!
-  count: BigInt!
-  _burner: Bytes! # address
-  _value: BigInt! # uint256
+  timestamp: BigInt!
+  senderAddress: Bytes!
+  receiverAddress: Bytes!
+  value: BigInt!
+  block: BigInt!
+  transactionId: Bytes!
+}
+type BurnEvent @entity {
+  id: ID!
+  timestamp: BigInt!
+  burnerAddress: Bytes!
+  transactionId: Bytes!
+  value: BigInt!
+  blockNumber: BigInt!
 }
